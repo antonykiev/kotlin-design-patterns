@@ -1,3 +1,5 @@
+package behavioural
+
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -5,7 +7,7 @@ interface HeadersChain {
     fun addHeader(inputHeader: String): String
 }
 
-class AuthenticationHeader(val token: String?, var next: HeadersChain? = null) : HeadersChain {
+class AuthenticationHeader(private val token: String?, var next: HeadersChain? = null) : HeadersChain {
 
     override fun addHeader(inputHeader: String): String {
         token ?: throw IllegalStateException("Token should be not null")
@@ -14,14 +16,14 @@ class AuthenticationHeader(val token: String?, var next: HeadersChain? = null) :
     }
 }
 
-class ContentTypeHeader(val contentType: String, var next: HeadersChain? = null) : HeadersChain {
+class ContentTypeHeader(private val contentType: String, var next: HeadersChain? = null) : HeadersChain {
 
     override fun addHeader(inputHeader: String): String =
         inputHeader + "ContentType: $contentType\n"
             .let { next?.addHeader(it) ?: it }
 }
 
-class BodyPayload(val body: String, var next: HeadersChain? = null) : HeadersChain {
+class BodyPayload(private val body: String, var next: HeadersChain? = null) : HeadersChain {
 
     override fun addHeader(inputHeader: String): String =
         inputHeader + "$body"
@@ -49,6 +51,7 @@ class ChainOfResponsibilityTest {
 
         val messageWithoutAuth =
             contentTypeHeader.addHeader("Headers:\n")
+
         println(messageWithoutAuth)
 
         assertThat(messageWithAuthentication).isEqualTo(
@@ -75,3 +78,4 @@ class ChainOfResponsibilityTest {
         )
     }
 }
+
